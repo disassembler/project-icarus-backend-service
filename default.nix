@@ -3,13 +3,16 @@ rec {
   project-icarus-backend = mkYarnPackage {
     name = "project-icarus-backend";
     src = lib.cleanSource ./.;
-    postInstallPhase = ''
+    postInstall = ''
       mkdir -p $out/bin
+      yarn run flow-remove-types
+      cp -vir flow-files $out/
       cat > $out/bin/icarus-backend-service <<EOF
       #!${stdenv.shell}
-      exec ${pkgs.nodejs}/bin/node $out/node_modules/icarus-poc-backend-service/src/index.js
+      exec ${nodejs}/bin/node $out/flow-files/index.js
       EOF
       chmod +x $out/bin/icarus-backend-service
+      cp -rv package.json config $out/
     '';
     packageJson = ./package.json;
     yarnLock = ./yarn.lock;
